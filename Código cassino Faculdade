@@ -1,1 +1,46 @@
+import random
 
+"""
+
+Classe base 'Jogo' criada para representar a estrutura comum de qualquer jogo de apostas.
+
+Aqui centralizamos tudo relacionado ao controle de saldo do jogador:
+- Depositar dinheiro
+- Sacar dinheiro (caso tenha saldo suficiente)
+- Ver o saldo atual
+
+A ideia é que todos os outros jogos herdem dessa classe pra não ter código repetido
+e pra manter um padrão. Com isso, dá pra focar só na lógica do jogo nas outras classes.
+
+"""
+
+class Jogo:
+    def __init__(self, saldo_inicial=0):
+        self._saldo = saldo_inicial
+
+    def depositar(self, valor):
+        if valor > 0:
+            self._saldo += valor
+            print(f"Depósito de R${valor:.2f} realizado com sucesso!")
+        else:
+            print("Valor de depósito inválido.")
+
+    def sacar(self, valor):
+        if 0 < valor <= self._saldo:
+            self._saldo -= valor
+            print(f"Saque de R${valor:.2f} realizado com sucesso!")
+            return valor
+        else:
+            print("Saldo insuficiente ou valor inválido.")
+            return 0
+
+    def verificar_saldo(self):
+        print(f"Saldo atual: R${self._saldo:.2f}")
+        return self._saldo
+
+    def get_saldo(self):
+        return self._saldo
+
+    def set_saldo(self, novo_saldo):
+        if novo_saldo >= 0:
+            self._saldo = novo_saldo
