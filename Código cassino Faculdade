@@ -14,6 +14,7 @@ e pra manter um padrão. Com isso, dá pra focar só na lógica do jogo nas outr
 
 """
 
+# Classe base
 class Jogo:
     def __init__(self, saldo_inicial=0):
         self._saldo = saldo_inicial
@@ -44,3 +45,106 @@ class Jogo:
     def set_saldo(self, novo_saldo):
         if novo_saldo >= 0:
             self._saldo = novo_saldo
+
+
+"""
+
+Versão simplificada do famoso jogo 21.
+
+O jogador e a casa recebem valores aleatórios. Ganha quem chegar mais perto de 21 sem passar.
+- Se o jogador passar de 21, perde automaticamente.
+- Se a casa passar e o jogador não, o jogador ganha.
+- Se os dois ficarem abaixo de 21, vence quem tiver o maior valor.
+
+Também herda de 'Jogo' pra fazer toda a parte de saldo.
+A ideia foi fazer uma lógica simples, sem cartas, só com números.
+
+"""
+
+# Classe do jogo Vinte e Um (herda de Jogo)
+class VinteUm(Jogo):
+    def __init__(self, saldo_inicial=0):
+        super().__init__(saldo_inicial)
+
+    def jogar(self, aposta):
+        if aposta > self._saldo:
+            print("Saldo insuficiente para essa aposta.")
+            return
+
+        self.sacar(aposta)  # Retira o valor da aposta
+
+        # Início do jogo
+        print("\n🃏 Bem-vindo ao Vinte e Um! 🃏")
+        jogador = []
+        dealer = []
+
+        # Distribuir 2 cartas para jogador e dealer
+        for _ in range(2):
+            jogador.append(random.randint(1, 11))
+            dealer.append(random.randint(1, 11))
+
+        while True:
+            print(f"\nSuas cartas: {jogador} | Total: {sum(jogador)}")
+            print(f"Carta visível do dealer: {dealer[0]}")
+
+            if sum(jogador) == 21:
+                print("🎉 Você fez 21! Vitória garantida!")
+                self.depositar(aposta * 2.5)
+                return
+            elif sum(jogador) > 21:
+                print("💥 Você estourou! Perdeu.")
+                return
+
+            escolha = input("Deseja (C)ontinuar comprando ou (P)arar? ").upper()
+            if escolha == 'C':
+                jogador.append(random.randint(1, 11))
+            elif escolha == 'P':
+                break
+            else:
+                print("Escolha inválida.")
+
+        # Vez do dealer
+        print(f"\nCartas do dealer: {dealer} | Total: {sum(dealer)}")
+        while sum(dealer) < 17:
+            dealer.append(random.randint(1, 11))
+            print(f"Dealer compra uma carta. Novas cartas: {dealer} | Total: {sum(dealer)}")
+
+        total_jogador = sum(jogador)
+        total_dealer = sum(dealer)
+
+        # Resultado
+        if total_dealer > 21 or total_jogador > total_dealer:
+            print("🎉 Você venceu!")
+            self.depositar(aposta * 2)
+        elif total_jogador == total_dealer:
+            print("🤝 Empate! Você recupera sua aposta.")
+            self.depositar(aposta)
+        else:
+            print("😔 Dealer venceu. Você perdeu.")
+
+
+# Exemplo de uso
+jogo = VinteUm(100)
+jogo.verificar_saldo()
+
+while True:
+    print("\n====== Menu ======")
+    print("1 - Jogar Vinte e Um")
+    print("2 - Depositar")
+    print("3 - Verificar saldo")
+    print("4 - Sair")
+    opcao = input("Escolha uma opção: ")
+
+    if opcao == '1':
+        aposta = float(input("Digite o valor da aposta: "))
+        jogo.jogar(aposta)
+    elif opcao == '2':
+        valor = float(input("Digite o valor para depósito: "))
+        jogo.depositar(valor)
+    elif opcao == '3':
+        jogo.verificar_saldo()
+    elif opcao == '4':
+        print("Saindo...")
+        break
+    else:
+        print("Opção inválida.")
