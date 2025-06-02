@@ -148,3 +148,50 @@ while True:
         break
     else:
         print("Opção inválida.")
+
+"""
+
+Simula um jogo de aposta com dados.
+
+O jogador escolhe um número entre 2 e 12 (soma de dois dados) e faz a aposta.
+Dois dados são lançados (números aleatórios entre 1 e 6) e a soma define o resultado.
+Se o jogador acertar o número, ganha 6x o valor apostado (simula uma chance baixa com recompensa alta).
+
+A lógica é direta e usamos a classe Jogo pra controlar saldo.
+Foi pensado pra testar sorte com uma chance mais difícil.
+
+"""
+
+
+class Dados(Jogo):
+    def jogar(self):
+        print("\n--- Jogo dos Dados ---")
+        try:
+            numero_apostado = int(input("Aposte em um número entre 2 e 12 (soma de dois dados): "))
+            aposta = float(input("Digite o valor da aposta: R$ "))
+            if aposta <= 0 or not self.sacar(aposta):
+                return
+        except ValueError:
+            print("Valores inválidos.")
+            return
+
+        if not 2 <= numero_apostado <= 12:
+            print("Número fora do intervalo.")
+            self.depositar(aposta)  # devolve aposta
+            return
+
+        d1 = random.randint(1, 6)
+        d2 = random.randint(1, 6)
+        soma = d1 + d2
+
+        print(f"Dados: {d1} + {d2} = {soma}")
+
+        if soma == numero_apostado:
+            premio = aposta * 6
+            print(f"Parabéns! Você ganhou R$ {premio:.2f}")
+            self.depositar(premio)
+        else:
+            print("Você perdeu!")
+
+        self.verificar_saldo()
+
