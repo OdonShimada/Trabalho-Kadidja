@@ -322,6 +322,53 @@ class Dados(Jogo):
 
         self.verificar_saldo()
 
+"""
+
+# -------------------------------
+# 🎲 JOGO PAR OU IMPAR
+# -------------------------------
+
+Jogo Par ou Ímpar.
+
+O jogador escolhe se quer par ou ímpar e aposta um valor.
+Dois números são sorteados, somados, e a paridade define quem venceu.
+
+Se o jogador acertar, ganha o valor apostado. Se errar, perde.
+Jogo rápido e com 50% de chance, simples pra testar as funções de aposta/saldo da classe base.
+
+"""
+
+class ParOuImpar(Jogo):
+    def jogar(self):
+        print("\n--- Jogo Par ou Ímpar ---")
+        escolha = input("Escolha 'par' ou 'ímpar': ").strip().lower()
+        if escolha not in ['par', 'ímpar']:
+            print("Escolha inválida.")
+            return
+
+        try:
+            aposta = float(input("Digite o valor da aposta: R$ "))
+            if aposta <= 0 or not self.sacar(aposta):
+                return
+        except ValueError:
+            print("Valor inválido.")
+            return
+
+        num1 = random.randint(1, 10)
+        num2 = random.randint(1, 10)
+        soma = num1 + num2
+        resultado = 'par' if soma % 2 == 0 else 'ímpar'
+
+        print(f"Números: {num1} + {num2} = {soma} ({resultado})")
+
+        if escolha == resultado:
+            print("Você ganhou!")
+            self.depositar(aposta * 2)
+        else:
+            print("Você perdeu!")
+
+        self.verificar_saldo()
+
 
 # -------------------------------
 # 🎡 JOGO DA ROLETA
