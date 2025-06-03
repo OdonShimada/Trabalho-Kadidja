@@ -214,7 +214,18 @@ def main():
 # Inicia o jogo
 main()
 
->>> DANIIEL COLOCA O COMENTÁRIO DO JOGO DA ROLETA AQUI <<<
+"""
+
+Jogo da Roleta (simples).
+
+O jogador escolhe entre vermelho ou preto, faz a aposta e a roleta "gira" (simulada com um número aleatório).
+Dependendo do número, associamos uma cor (par = vermelho, ímpar = preto).
+Se o jogador acertar a cor, ele ganha o dobro da aposta. Se errar, perde.
+
+Usa a classe base Jogo pra lidar com o saldo do jogador.
+A ideia é simular a experiência de um cassino de forma bem simples.
+
+"""
 
 class Roleta(Jogo):
     def __init__(self, saldo_inicial=0):
