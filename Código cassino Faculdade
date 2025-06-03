@@ -213,3 +213,107 @@ def main():
 
 # Inicia o jogo
 main()
+
+import random
+"""
+
+Classe base 'Jogo' criada para representar a estrutura comum de qualquer jogo de apostas.
+
+Aqui centralizamos tudo relacionado ao controle de saldo do jogador:
+- Depositar dinheiro
+- Sacar dinheiro (caso tenha saldo suficiente)
+- Ver o saldo atual
+
+A ideia é que todos os outros jogos herdem dessa classe pra não ter código repetido
+e pra manter um padrão. Com isso, dá pra focar só na lógica do jogo nas outras classes.
+
+"""
+class Jogo:
+    def __init__(self, saldo_inicial=0):
+        self.saldo = saldo_inicial
+
+    def depositar(self, valor):
+        if valor > 0:
+            self.saldo += valor
+            print(f"Depósito de R${valor:.2f} realizado com sucesso!")
+        else:
+            print("Valor de depósito inválido.")
+
+    def sacar(self, valor):
+        if 0 < valor <= self.saldo:
+            self.saldo -= valor
+            print(f"Saque de R${valor:.2f} realizado com sucesso!")
+            return valor
+        else:
+            print("Saldo insuficiente ou valor inválido.")
+            return 0
+
+    def verificar_saldo(self):
+        print(f"Saldo atual: R${self.saldo:.2f}")
+        return self.saldo
+
+
+class Roleta(Jogo):
+    def __init__(self, saldo_inicial=0):
+        super().__init__(saldo_inicial)
+
+    def apostar(self, numero, valor):
+        if valor > self.saldo:
+            print("Saldo insuficiente para essa aposta.")
+            return
+
+        if numero < 0 or numero > 36:
+            print("Número inválido. Escolha entre 0 e 36.")
+            return
+
+        print(f"Apostando R${valor:.2f} no número {numero}... Girando a roleta!")
+        resultado = random.randint(0, 36)
+        print(f"Número sorteado: {resultado}")
+
+        if resultado == numero:
+            ganho = valor * 35
+            self.saldo += ganho
+            print(f"Parabéns! Você ganhou R${ganho:.2f}")
+        else:
+            self.saldo -= valor
+            print("Você perdeu a aposta.")
+
+        self.verificar_saldo()
+
+
+# Execução
+def jogar():
+    print("Bem-vindo ao jogo da Roleta!")
+    saldo_inicial = float(input("Insira seu saldo inicial: R$"))
+    jogo = Roleta(saldo_inicial)
+
+    while True:
+        print("\nMenu:")
+        print("1. Verificar saldo")
+        print("2. Depositar")
+        print("3. Sacar")
+        print("4. Apostar na roleta")
+        print("5. Sair")
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == '1':
+            jogo.verificar_saldo()
+        elif opcao == '2':
+            valor = float(input("Valor para depositar: R$"))
+            jogo.depositar(valor)
+        elif opcao == '3':
+            valor = float(input("Valor para sacar: R$"))
+            jogo.sacar(valor)
+        elif opcao == '4':
+            numero = int(input("Escolha um número entre 0 e 36: "))
+            valor = float(input("Valor da aposta: R$"))
+            jogo.apostar(numero, valor)
+        elif opcao == '5':
+            print("Obrigado por jogar!")
+            break
+        else:
+            print("Opção inválida.")
+
+
+if __name__ == "__main__":
+    jogar()
