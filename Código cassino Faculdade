@@ -123,32 +123,6 @@ class VinteUm(Jogo):
             print("😔 Dealer venceu. Você perdeu.")
 
 
-# Exemplo de uso
-jogo = VinteUm(100)
-jogo.verificar_saldo()
-
-while True:
-    print("\n====== Menu ======")
-    print("1 - Jogar Vinte e Um")
-    print("2 - Depositar")
-    print("3 - Verificar saldo")
-    print("4 - Sair")
-    opcao = input("Escolha uma opção: ")
-
-    if opcao == '1':
-        aposta = float(input("Digite o valor da aposta: "))
-        jogo.jogar(aposta)
-    elif opcao == '2':
-        valor = float(input("Digite o valor para depósito: "))
-        jogo.depositar(valor)
-    elif opcao == '3':
-        jogo.verificar_saldo()
-    elif opcao == '4':
-        print("Saindo...")
-        break
-    else:
-        print("Opção inválida.")
-
 """
 
 Simula um jogo de aposta com dados.
@@ -194,4 +168,48 @@ class Dados(Jogo):
             print("Você perdeu!")
 
         self.verificar_saldo()
+        
+# Exemplo de uso
+def main():
+    saldo_inicial = float(input("Informe o saldo inicial: R$ "))
+    jogos = {
+        1: VinteUm(saldo_inicial),
+        2: Dados(saldo_inicial)
+    }
 
+    while True:
+        print("\n--- MENU ---")
+        print("1 - Jogar 21 (Vinte e Um)")
+        print("2 - Jogar Dados")
+        print("3 - Verificar saldo")
+        print("4 - Depositar")
+        print("5 - Sair")
+
+        escolha = input("Escolha uma opção: ")
+
+        if escolha == '1':
+            try:
+                aposta = float(input("Digite o valor da aposta: R$ "))
+                jogos[1].jogar(aposta)
+            except ValueError:
+                print("Valor de aposta inválido.")
+        elif escolha == '2':
+            jogos[2].jogar()
+        elif escolha == '3':
+            jogos[1].verificar_saldo()  # Ambos compartilham saldo
+        elif escolha == '4':
+            try:
+                valor = float(input("Valor para depósito: R$ "))
+                for jogo in jogos.values():
+                    jogo.depositar(valor)
+                    break  # basta um, pois saldo é compartilhado
+            except ValueError:
+                print("Valor inválido.")
+        elif escolha == '5':
+            print("Saindo... Obrigado por jogar!")
+            break
+        else:
+            print("Opção inválida.")
+
+# Inicia o jogo
+main()
