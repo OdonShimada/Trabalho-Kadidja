@@ -1,108 +1,79 @@
 import random
-
-"""
-
-O **Menu Principal** foi criado para organizar a navegação entre os diferentes jogos e funções do cassino.
-
-Aqui centralizamos tudo que o jogador pode fazer no sistema:
-- Escolher entre os jogos disponíveis (21, Dados, Roleta, Par ou Ímpar)
-- Verificar o saldo atual
-- Fazer depósitos
-- Encerrar o jogo (sair)
-
-A ideia é oferecer uma interface simples, intuitiva e interativa,
-permitindo que o jogador tenha controle total sobre sua experiência no cassino.
-Além disso, em qualquer momento dentro dos jogos ou menus, existe a opção de voltar para o menu principal,
-garantindo que o jogador não fique preso em nenhuma etapa.
-
-Isso permite uma navegação clara, segura e eficiente,
-mantendo a organização do código e facilitando futuras atualizações ou inclusão de novos jogos.
-
-"""
-
-def main():
-    saldo_inicial = float(input("Informe o saldo inicial: R$ "))
-    jogos = {
-        1: VinteUm(saldo_inicial),
-        2: Dados(saldo_inicial),
-        3: Roleta(saldo_inicial),
-        4: ParOuImpar(saldo_inicial)  # Jogo adicionado aqui
-    }
-
-    while True:
-        print("\n --- MENU DE JOGOS ---")
-        print("1 - Jogar 21 (Vinte e Um)")
-        print("2 - Jogar Dados")
-        print("3 - Jogar Roleta")
-        print("4 - Jogar Par ou Ímpar")  # Opção adicionada
-        print("5 - Verificar saldo")
-        print("6 - Depositar")
-        print("7 - Sair")
-
-        escolha = input("Escolha uma opção: ")
-
-        if escolha == '1':
-            jogos[1].menu()
-        elif escolha == '2':
-            jogos[2].menu()
-        elif escolha == '3':
-            jogos[3].menu()
-        elif escolha == '4':
-            jogos[4].menu()  # Chama o menu de Par ou Ímpar
-        elif escolha == '5':
-            jogos[1].verificar_saldo()
-        elif escolha == '6':
-            realizar_deposito(jogos)
-        elif escolha == '7':
-            print(" Saindo... Obrigado por jogar!")
-            break
-        else:
-            print("Opção inválida.")
+import sqlite3
 
 
-def realizar_deposito(jogos):
-    valor = input("Valor para depósito (ou 'M' para Menu): ").upper()
-    if valor == 'M':
-        return
+# ------------------------ BANCO DE DADOS ------------------------
+
+def criar_banco():
+    conexao = sqlite3.connect('cassino.db')
+    cursor = conexao.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT UNIQUE NOT NULL,
+            saldo REAL NOT NULL
+        )
+    ''')
+
+    conexao.commit()
+    conexao.close()
+
+
+def cadastrar_usuario(nome, saldo_inicial):
+    conexao = sqlite3.connect('cassino.db')
+    cursor = conexao.cursor()
+
     try:
-        valor = float(valor)
-        if valor > 0:
-            for jogo in jogos.values():
-                jogo.depositar(valor)
-            print(" Depósito realizado com sucesso!")
-        else:
-            print("Valor inválido.")
-    except ValueError:
-        print("Valor inválido.")
+        cursor.execute('INSERT INTO usuarios (nome, saldo) VALUES (?, ?)', (nome, saldo_inicial))
+        conexao.commit()
+        print(f"Usuário {nome} cadastrado com saldo R${saldo_inicial:.2f}")
+    except sqlite3.IntegrityError:
+        print("Usuário já existe.")
+    conexao.close()
 
 
-"""
+def carregar_usuario(nome):
+    conexao = sqlite3.connect('cassino.db')
+    cursor = conexao.cursor()
 
-Classe base 'Jogo' criada para representar a estrutura comum de qualquer jogo de apostas.
+    cursor.execute('SELECT saldo FROM usuarios WHERE nome = ?', (nome,))
+    resultado = cursor.fetchone()
+    conexao.close()
 
-Aqui centralizamos tudo relacionado ao controle de saldo do jogador:
-- Depositar dinheiro
-- Sacar dinheiro (caso tenha saldo suficiente)
-- Ver o saldo atual
+    if resultado:
+        return resultado[0]
+    else:
+        return None
 
-A ideia é que todos os outros jogos herdem dessa classe pra não ter código repetido
-e pra manter um padrão. Com isso, dá pra focar só na lógica do jogo nas outras classes.
 
-"""
+def atualizar_saldo(nome, novo_saldo):
+    conexao = sqlite3.connect('cassino.db')
+    cursor = conexao.cursor()
+
+    cursor.execute('UPDATE usuarios SET saldo = ? WHERE nome = ?', (novo_saldo, nome))
+    conexao.commit()
+    conexao.close()
+
+
+# ------------------------ CLASSE BASE ------------------------
 
 class Jogo:
-    def __init__(self, saldo_inicial=0):
-        self._saldo = saldo_inicial
+    def __init__(self, usuario):
+        self._nome = usuario
+        self._saldo = carregar_usuario(usuario)
 
     def depositar(self, valor):
         if valor > 0:
             self._saldo += valor
+            atualizar_saldo(self._nome, self._saldo)
         else:
             print("Valor de depósito inválido.")
 
     def sacar(self, valor):
         if 0 < valor <= self._saldo:
             self._saldo -= valor
+            atualizar_saldo(self._nome, self._saldo)
             return valor
         else:
             return 0
@@ -111,24 +82,10 @@ class Jogo:
         print(f"Saldo atual: R${self._saldo:.2f}")
         return self._saldo
 
-"""
 
-Versão simplificada do famoso jogo 21.
-
-O jogador e a casa recebem valores aleatórios. Ganha quem chegar mais perto de 21 sem passar.
-- Se o jogador passar de 21, perde automaticamente.
-- Se a casa passar e o jogador não, o jogador ganha.
-- Se os dois ficarem abaixo de 21, vence quem tiver o maior valor.
-
-Também herda de 'Jogo' pra fazer toda a parte de saldo.
-A ideia foi fazer uma lógica simples, sem cartas, só com números.
-
-"""
+# ------------------------ JOGO 21 ------------------------
 
 class VinteUm(Jogo):
-    def __init__(self, saldo_inicial=0):
-        super().__init__(saldo_inicial)
-
     def menu(self):
         while True:
             if self._saldo <= 0:
@@ -145,7 +102,7 @@ class VinteUm(Jogo):
                     continue
 
                 if aposta > self._saldo:
-                    print("Saldo insuficiente para essa aposta.")
+                    print("Saldo insuficiente.")
                     self.fazer_deposito()
                     continue
 
@@ -155,9 +112,6 @@ class VinteUm(Jogo):
 
             opcao = input("\n Jogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
-                break
-            elif opcao != 'S':
-                print("Opção inválida. Retornando ao menu.")
                 break
 
     def fazer_deposito(self):
@@ -169,7 +123,7 @@ class VinteUm(Jogo):
                 valor = float(valor)
                 if valor > 0:
                     self.depositar(valor)
-                    print(" Depósito realizado.")
+                    print("Depósito realizado.")
                     break
                 else:
                     print("Valor inválido.")
@@ -179,24 +133,22 @@ class VinteUm(Jogo):
     def jogar(self, aposta):
         self.sacar(aposta)
 
-        print("\n Bem-vindo ao Vinte e Um!")
-        jogador = []
-        dealer = []
-
-        for _ in range(2):
-            jogador.append(random.randint(1, 11))
-            dealer.append(random.randint(1, 11))
+        print("\nBem-vindo ao Vinte e Um!")
+        jogador = [random.randint(1, 11) for _ in range(2)]
+        dealer = [random.randint(1, 11) for _ in range(2)]
 
         while True:
             print(f"\nSuas cartas: {jogador} | Total: {sum(jogador)}")
             print(f"Carta visível do dealer: {dealer[0]}")
 
             if sum(jogador) == 21:
+                ganho = aposta * 2.5
                 print("Você fez 21! Vitória garantida!")
-                self.depositar(aposta * 2.5)
+                self.depositar(ganho)
+                print(f"Você ganhou R${ganho - aposta:.2f}")
                 return
             elif sum(jogador) > 21:
-                print("Você estourou! Perdeu.")
+                print(f"Você estourou! Perdeu R${aposta:.2f}.")
                 return
 
             escolha = input("Deseja (C)ontinuar, (P)arar ou (M)enu? ").upper()
@@ -206,39 +158,27 @@ class VinteUm(Jogo):
                 break
             elif escolha == 'M':
                 return
-            else:
-                print("Escolha inválida.")
 
         print(f"\nCartas do dealer: {dealer} | Total: {sum(dealer)}")
         while sum(dealer) < 17:
             dealer.append(random.randint(1, 11))
-            print(f"Dealer compra uma carta. Novas cartas: {dealer} | Total: {sum(dealer)}")
+            print(f"Dealer compra. Novas cartas: {dealer} | Total: {sum(dealer)}")
 
         total_jogador = sum(jogador)
         total_dealer = sum(dealer)
 
         if total_dealer > 21 or total_jogador > total_dealer:
-            print("Você venceu!")
-            self.depositar(aposta * 2)
+            ganho = aposta * 2
+            print(f"Você venceu! Ganhou R${ganho - aposta:.2f}")
+            self.depositar(ganho)
         elif total_jogador == total_dealer:
-            print("Empate! Você recupera sua aposta.")
+            print(f"Empate! Você recupera sua aposta de R${aposta:.2f}.")
             self.depositar(aposta)
         else:
-            print("Dealer venceu. Você perdeu.")
+            print(f"Dealer venceu. Você perdeu R${aposta:.2f}.")
 
 
-"""
-
-Simula um jogo de aposta com dados.
-
-O jogador escolhe um número entre 2 e 12 (soma de dois dados) e faz a aposta.
-Dois dados são lançados (números aleatórios entre 1 e 6) e a soma define o resultado.
-Se o jogador acertar o número, ganha 6x o valor apostado (simula uma chance baixa com recompensa alta).
-
-A lógica é direta e usamos a classe Jogo pra controlar saldo.
-Foi pensado pra testar sorte com uma chance mais difícil.
-
-"""
+# ------------------------ JOGO DADOS ------------------------
 
 class Dados(Jogo):
     def menu(self):
@@ -273,9 +213,6 @@ class Dados(Jogo):
             opcao = input("\nJogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
-            elif opcao != 'S':
-                print("Opção inválida. Retornando ao menu.")
-                break
 
     def fazer_deposito(self):
         while True:
@@ -305,24 +242,15 @@ class Dados(Jogo):
 
         if soma == numero_apostado:
             premio = aposta * 6
-            print(f"Parabéns! Você ganhou R$ {premio:.2f}")
+            print(f"Parabéns! Você ganhou R${premio - aposta:.2f}")
             self.depositar(premio)
         else:
-            print("Você perdeu!")
+            print(f"Você perdeu R${aposta:.2f}.")
 
         self.verificar_saldo()
 
 
-"""
-Jogo Par ou Ímpar.
-
-O jogador escolhe se quer par ou ímpar e aposta um valor.
-Dois números são sorteados, somados, e a paridade define quem venceu.
-
-Se o jogador acertar, ganha o valor apostado. Se errar, perde.
-Jogo rápido e com 50% de chance, simples pra testar as funções de aposta/saldo da classe base.
-
-"""
+# ------------------------ JOGO PAR OU ÍMPAR ------------------------
 
 class ParOuImpar(Jogo):
     def menu(self):
@@ -356,9 +284,6 @@ class ParOuImpar(Jogo):
             opcao = input("\nJogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
-            elif opcao != 'S':
-                print("Opção inválida. Retornando ao menu.")
-                break
 
     def fazer_deposito(self):
         while True:
@@ -388,26 +313,16 @@ class ParOuImpar(Jogo):
         print(f"Números: {num1} + {num2} = {soma} ({resultado})")
 
         if escolha == resultado:
-            print("Você ganhou!")
-            self.depositar(aposta * 2)
+            ganho = aposta * 2
+            print(f"Você ganhou R${ganho - aposta:.2f}")
+            self.depositar(ganho)
         else:
-            print("Você perdeu!")
+            print(f"Você perdeu R${aposta:.2f}.")
 
         self.verificar_saldo()
 
 
-"""
-
-Jogo da Roleta (simples).
-
-O jogador escolhe entre vermelho ou preto, faz a aposta e a roleta "gira" (simulada com um número aleatório).
-Dependendo do número, associamos uma cor (par = vermelho, ímpar = preto).
-Se o jogador acertar a cor, ele ganha o dobro da aposta. Se errar, perde.
-
-Usa a classe base Jogo pra lidar com o saldo do jogador.
-A ideia é simular a experiência de um cassino de forma bem simples.
-
-"""
+# ------------------------ JOGO ROLETA ------------------------
 
 class Roleta(Jogo):
     def menu(self):
@@ -439,9 +354,6 @@ class Roleta(Jogo):
             opcao = input("\nJogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
-            elif opcao != 'S':
-                print("Opção inválida. Retornando ao menu.")
-                break
 
     def fazer_deposito(self):
         while True:
@@ -461,7 +373,7 @@ class Roleta(Jogo):
 
     def apostar(self, numero, valor):
         if numero < 0 or numero > 36:
-            print("Número inválido. Escolha entre 0 e 36.")
+            print("Número inválido.")
             return
 
         self.sacar(valor)
@@ -472,13 +384,84 @@ class Roleta(Jogo):
 
         if resultado == numero:
             ganho = valor * 35
-            print(f"Parabéns! Você ganhou R${ganho:.2f}")
+            print(f"Parabéns! Você ganhou R${ganho - valor:.2f}")
             self.depositar(ganho)
         else:
-            print("Você perdeu a aposta.")
+            print(f"Você perdeu R${valor:.2f}.")
 
         self.verificar_saldo()
 
 
-if __name__ == "__main__":
+# ------------------------ MENU PRINCIPAL ------------------------
+
+def main():
+    criar_banco()
+    print("=== Cassino Virtual ===")
+
+    while True:
+        nome = input("\nDigite seu nome de usuário: ").strip()
+        saldo = carregar_usuario(nome)
+
+        if saldo is None:
+            saldo_inicial = float(input("Bem-vindo! Informe seu saldo inicial: R$ "))
+            cadastrar_usuario(nome, saldo_inicial)
+
+        jogos = {
+            1: VinteUm(nome),
+            2: Dados(nome),
+            3: Roleta(nome),
+            4: ParOuImpar(nome)
+        }
+
+        while True:
+            print("\n --- MENU DE JOGOS ---")
+            print("1 - Jogar 21 (Vinte e Um)")
+            print("2 - Jogar Dados")
+            print("3 - Jogar Roleta")
+            print("4 - Jogar Par ou Ímpar")
+            print("5 - Verificar saldo")
+            print("6 - Depositar")
+            print("7 - Trocar de usuário")
+
+            escolha = input("Escolha uma opção: ")
+
+            if escolha == '1':
+                jogos[1].menu()
+            elif escolha == '2':
+                jogos[2].menu()
+            elif escolha == '3':
+                jogos[3].menu()
+            elif escolha == '4':
+                jogos[4].menu()
+            elif escolha == '5':
+                jogos[1].verificar_saldo()
+            elif escolha == '6':
+                realizar_deposito(jogos)
+            elif escolha == '7':
+                print("Trocando de usuário...\n")
+                break
+            else:
+                print("Opção inválida.")
+
+
+def realizar_deposito(jogos):
+    valor = input("Valor para depósito (ou 'M' para Menu): ").upper()
+    if valor == 'M':
+        return
+    try:
+        valor = float(valor)
+        if valor > 0:
+            for jogo in jogos.values():
+                jogo.depositar(valor)
+            # Sincronizar saldo em todas as instâncias após depósito
+            for jogo in jogos.values():
+                jogo._saldo = carregar_usuario(jogo._nome)
+            print(" Depósito realizado com sucesso!")
+        else:
+            print("Valor inválido.")
+    except ValueError:
+        print("Valor inválido.")
+
+
+if __name__ == '__main__':
     main()
