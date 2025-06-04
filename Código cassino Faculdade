@@ -5,7 +5,7 @@ import random
 O **Menu Principal** foi criado para organizar a navegação entre os diferentes jogos e funções do cassino.
 
 Aqui centralizamos tudo que o jogador pode fazer no sistema:
-- Escolher entre os jogos disponíveis (21, Dados e Roleta)
+- Escolher entre os jogos disponíveis (21, Dados, Roleta, Par ou Ímpar)
 - Verificar o saldo atual
 - Fazer depósitos
 - Encerrar o jogo (sair)
