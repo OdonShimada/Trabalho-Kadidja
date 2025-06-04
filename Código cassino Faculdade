@@ -301,7 +301,7 @@ class Dados(Jogo):
         d2 = random.randint(1, 6)
         soma = d1 + d2
 
-        print(f"🎲 Dados: {d1} + {d2} = {soma}")
+        print(f"Dados: {d1} + {d2} = {soma}")
 
         if soma == numero_apostado:
             premio = aposta * 6
@@ -466,7 +466,7 @@ class Roleta(Jogo):
 
         self.sacar(valor)
 
-        print(f"Apostando R${valor:.2f} no número {numero}... 🎡 Girando a roleta!")
+        print(f"Apostando R${valor:.2f} no número {numero}... Girando a roleta!")
         resultado = random.randint(0, 36)
         print(f"Número sorteado: {resultado}")
 
