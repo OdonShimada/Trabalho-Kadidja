@@ -1,9 +1,5 @@
 import random
 
-
-# -------------------------------
-# 🎰 MENU PRINCIPAL
-# -------------------------------
 """
 
 O **Menu Principal** foi criado para organizar a navegação entre os diferentes jogos e funções do cassino.
@@ -34,7 +30,7 @@ def main():
     }
 
     while True:
-        print("\n🎰 --- MENU DE JOGOS ---")
+        print("\n --- MENU DE JOGOS ---")
         print("1 - Jogar 21 (Vinte e Um)")
         print("2 - Jogar Dados")
         print("3 - Jogar Roleta")
@@ -58,7 +54,7 @@ def main():
         elif escolha == '6':
             realizar_deposito(jogos)
         elif escolha == '7':
-            print("👋 Saindo... Obrigado por jogar!")
+            print(" Saindo... Obrigado por jogar!")
             break
         else:
             print("Opção inválida.")
@@ -73,16 +69,13 @@ def realizar_deposito(jogos):
         if valor > 0:
             for jogo in jogos.values():
                 jogo.depositar(valor)
-            print("💸 Depósito realizado com sucesso!")
+            print(" Depósito realizado com sucesso!")
         else:
             print("Valor inválido.")
     except ValueError:
         print("Valor inválido.")
 
 
-# -------------------------------
-# 🏦 CLASSE BASE
-# -------------------------------
 """
 
 Classe base 'Jogo' criada para representar a estrutura comum de qualquer jogo de apostas.
@@ -115,13 +108,9 @@ class Jogo:
             return 0
 
     def verificar_saldo(self):
-        print(f"💰 Saldo atual: R${self._saldo:.2f}")
+        print(f"Saldo atual: R${self._saldo:.2f}")
         return self._saldo
 
-
-# -------------------------------
-# 🃏 JOGO 21 (Vinte e Um)
-# -------------------------------
 """
 
 Versão simplificada do famoso jogo 21.
@@ -143,7 +132,7 @@ class VinteUm(Jogo):
     def menu(self):
         while True:
             if self._saldo <= 0:
-                print("⚠️ Seu saldo está zerado!")
+                print(" Seu saldo está zerado!")
                 self.fazer_deposito()
 
             aposta = input("Digite o valor da aposta (ou 'M' para Menu): ").upper()
@@ -164,7 +153,7 @@ class VinteUm(Jogo):
             except ValueError:
                 print("Valor inválido.")
 
-            opcao = input("\n🔄 Jogar novamente (S) ou 🔙 Voltar ao menu (N)? ").upper()
+            opcao = input("\n Jogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
             elif opcao != 'S':
@@ -180,7 +169,7 @@ class VinteUm(Jogo):
                 valor = float(valor)
                 if valor > 0:
                     self.depositar(valor)
-                    print("✅ Depósito realizado.")
+                    print(" Depósito realizado.")
                     break
                 else:
                     print("Valor inválido.")
@@ -190,7 +179,7 @@ class VinteUm(Jogo):
     def jogar(self, aposta):
         self.sacar(aposta)
 
-        print("\n🃏 Bem-vindo ao Vinte e Um! 🃏")
+        print("\n Bem-vindo ao Vinte e Um!")
         jogador = []
         dealer = []
 
@@ -203,11 +192,11 @@ class VinteUm(Jogo):
             print(f"Carta visível do dealer: {dealer[0]}")
 
             if sum(jogador) == 21:
-                print("🎉 Você fez 21! Vitória garantida!")
+                print("Você fez 21! Vitória garantida!")
                 self.depositar(aposta * 2.5)
                 return
             elif sum(jogador) > 21:
-                print("💥 Você estourou! Perdeu.")
+                print("Você estourou! Perdeu.")
                 return
 
             escolha = input("Deseja (C)ontinuar, (P)arar ou (M)enu? ").upper()
@@ -229,18 +218,15 @@ class VinteUm(Jogo):
         total_dealer = sum(dealer)
 
         if total_dealer > 21 or total_jogador > total_dealer:
-            print("🎉 Você venceu!")
+            print("Você venceu!")
             self.depositar(aposta * 2)
         elif total_jogador == total_dealer:
-            print("🤝 Empate! Você recupera sua aposta.")
+            print("Empate! Você recupera sua aposta.")
             self.depositar(aposta)
         else:
-            print("😔 Dealer venceu. Você perdeu.")
+            print("Dealer venceu. Você perdeu.")
 
 
-# -------------------------------
-# 🎲 JOGO DOS DADOS
-# -------------------------------
 """
 
 Simula um jogo de aposta com dados.
@@ -258,7 +244,7 @@ class Dados(Jogo):
     def menu(self):
         while True:
             if self._saldo <= 0:
-                print("⚠️ Seu saldo está zerado!")
+                print("Seu saldo está zerado!")
                 self.fazer_deposito()
 
             numero_apostado = input("Aposte em um número entre 2 e 12 (ou 'M' para Menu): ").upper()
@@ -284,7 +270,7 @@ class Dados(Jogo):
             except ValueError:
                 print("Valores inválidos.")
 
-            opcao = input("\n🔄 Jogar novamente (S) ou 🔙 Voltar ao menu (N)? ").upper()
+            opcao = input("\nJogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
             elif opcao != 'S':
@@ -300,7 +286,7 @@ class Dados(Jogo):
                 valor = float(valor)
                 if valor > 0:
                     self.depositar(valor)
-                    print("✅ Depósito realizado.")
+                    print("Depósito realizado.")
                     break
                 else:
                     print("Valor inválido.")
@@ -310,7 +296,7 @@ class Dados(Jogo):
     def jogar(self, numero_apostado, aposta):
         self.sacar(aposta)
 
-        print("\n🎲 --- Jogo dos Dados ---")
+        print("\nJogo dos Dados")
         d1 = random.randint(1, 6)
         d2 = random.randint(1, 6)
         soma = d1 + d2
@@ -319,17 +305,14 @@ class Dados(Jogo):
 
         if soma == numero_apostado:
             premio = aposta * 6
-            print(f"🎉 Parabéns! Você ganhou R$ {premio:.2f}")
+            print(f"Parabéns! Você ganhou R$ {premio:.2f}")
             self.depositar(premio)
         else:
-            print("😢 Você perdeu!")
+            print("Você perdeu!")
 
         self.verificar_saldo()
 
 
-# -------------------------------
-# ✋ JOGO PAR OU ÍMPAR
-# -------------------------------
 """
 Jogo Par ou Ímpar.
 
@@ -345,7 +328,7 @@ class ParOuImpar(Jogo):
     def menu(self):
         while True:
             if self._saldo <= 0:
-                print("⚠️ Seu saldo está zerado!")
+                print("Seu saldo está zerado!")
                 self.fazer_deposito()
 
             escolha = input("Escolha 'par' ou 'ímpar' (ou 'M' para Menu): ").strip().lower()
@@ -370,7 +353,7 @@ class ParOuImpar(Jogo):
             except ValueError:
                 print("Valor inválido.")
 
-            opcao = input("\n🔄 Jogar novamente (S) ou 🔙 Voltar ao menu (N)? ").upper()
+            opcao = input("\nJogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
             elif opcao != 'S':
@@ -386,7 +369,7 @@ class ParOuImpar(Jogo):
                 valor = float(valor)
                 if valor > 0:
                     self.depositar(valor)
-                    print("✅ Depósito realizado.")
+                    print("Depósito realizado.")
                     break
                 else:
                     print("Valor inválido.")
@@ -396,7 +379,7 @@ class ParOuImpar(Jogo):
     def jogar(self, escolha, aposta):
         self.sacar(aposta)
 
-        print("\n✋ --- Jogo Par ou Ímpar ---")
+        print("\nJogo Par ou Ímpar")
         num1 = random.randint(1, 10)
         num2 = random.randint(1, 10)
         soma = num1 + num2
@@ -405,17 +388,14 @@ class ParOuImpar(Jogo):
         print(f"Números: {num1} + {num2} = {soma} ({resultado})")
 
         if escolha == resultado:
-            print("🎉 Você ganhou!")
+            print("Você ganhou!")
             self.depositar(aposta * 2)
         else:
-            print("😢 Você perdeu!")
+            print("Você perdeu!")
 
         self.verificar_saldo()
 
 
-# -------------------------------
-# 🎡 JOGO DA ROLETA
-# -------------------------------
 """
 
 Jogo da Roleta (simples).
@@ -433,7 +413,7 @@ class Roleta(Jogo):
     def menu(self):
         while True:
             if self._saldo <= 0:
-                print("⚠️ Seu saldo está zerado!")
+                print("Seu saldo está zerado!")
                 self.fazer_deposito()
 
             numero = input("Escolha um número entre 0 e 36 (ou 'M' para Menu): ").upper()
@@ -456,7 +436,7 @@ class Roleta(Jogo):
             except ValueError:
                 print("Valor inválido.")
 
-            opcao = input("\n🔄 Jogar novamente (S) ou 🔙 Voltar ao menu (N)? ").upper()
+            opcao = input("\nJogar novamente (S) ou Voltar ao menu (N)? ").upper()
             if opcao == 'N':
                 break
             elif opcao != 'S':
@@ -472,7 +452,7 @@ class Roleta(Jogo):
                 valor = float(valor)
                 if valor > 0:
                     self.depositar(valor)
-                    print("✅ Depósito realizado.")
+                    print("Depósito realizado.")
                     break
                 else:
                     print("Valor inválido.")
@@ -492,16 +472,13 @@ class Roleta(Jogo):
 
         if resultado == numero:
             ganho = valor * 35
-            print(f"🎉 Parabéns! Você ganhou R${ganho:.2f}")
+            print(f"Parabéns! Você ganhou R${ganho:.2f}")
             self.depositar(ganho)
         else:
-            print("😢 Você perdeu a aposta.")
+            print("Você perdeu a aposta.")
 
         self.verificar_saldo()
 
 
-# -------------------------------
-# 🔥 EXECUTAR
-# -------------------------------
 if __name__ == "__main__":
     main()
